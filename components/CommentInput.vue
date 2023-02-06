@@ -43,8 +43,8 @@ export default {
       await this.$axios.post(
         "/comments/",
         {
-          postId: parseInt(this.postId),
-          userId: this.userId,
+          post_id: parseInt(this.postId),
+          author_id: this.userId,
           content: this.content
         }
       )

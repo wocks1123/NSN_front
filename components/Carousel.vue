@@ -2,7 +2,7 @@
   <div class="relative">
     <!-- Carousel Wrapper -->
     <div
-      class="relative w-full h-120 overflow-hidden"
+      class="relative w-full h-100 md:h-150 overflow-hidden"
     >
       <button
         @click="clickLeft"
@@ -53,7 +53,7 @@
       >
         <img
           class="w-full object-fit"
-          :src="$axios.defaults.baseURL + '/images/' + src"
+          :src="$axios.defaults.baseURL + '/media/' + src"
         />
       </div>
     </div>
