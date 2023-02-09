@@ -1,15 +1,16 @@
 <template>
   <div
-    class="bg-blue-100 h-full flex flex-col flex-grow"
+    class="bg-gray-800 h-full flex flex-col flex-grow"
   >
     <!-- Top -->
     <div
       class="flex-grow flex relative "
     >
+      <!-- Before Upload-->
       <div
         v-show="localFiles.length === 0"
         ref="uploadImage"
-        class="w-full  flex flex-col justify-center items-center bg-green-100"
+        class="w-full  flex flex-col justify-center items-center bg-gray-100"
       >
         <input ref="fileInput" type="file" :value="files" @input="fileUpdated" multiple class="hidden"/>
         <div class="">
@@ -29,13 +30,18 @@
 
       <div
         v-if="localFiles.length !== 0"
-        class="flex w-full grid justify-center items-center"
+        class="flex w-full  justify-center items-center"
       >
-        <img
-          class="w-full object-contain min-h-0 h-full "
-          :src="window.URL.createObjectURL(localFiles[selectedIdx])"
-        />
+        <div class="w-full object-contain h-full">
 
+
+          <img
+            ref="imageArea"
+            @click="clickImageArea"
+            class="w-full object-contain min-h-0 h-full "
+            :src="window.URL.createObjectURL(localFiles[selectedIdx])"
+          />
+        </div>
         <!-- Carousel Buttons -->
         <div
           v-show="localFiles.length !== 0 && selectedIdx !== localFiles.length - 1"
@@ -77,15 +83,18 @@
       </div>
 
       <!-- Bottom -->
-      <div class="absolute bottom-0 w-full">
+
         <!-- Image Array -->
         <div
           v-show="imageListModal"
           ref="outer"
 
           class="
-            mb-2 h-26 m-2 w-auto
-            bg-gray-500 bg-opacity-70
+            w-full
+
+            absolute bottom-12 left-0
+            mb-2 h-26
+            bg-opacity-70
             flex justify-end
             flex-nowrap
             rounded-r-lg
@@ -95,6 +104,7 @@
           <!-- Inner -->
           <div
             ref="inner"
+            @scroll="handleScroll"
             class="
                 h-26
                 no-scrollbar
@@ -103,16 +113,18 @@
                 rounded-l-lg
                 p-2
                 gap-2
-                transition-all bg-red-200
+                transition-all bg-gray-600
               "
           >
             <!-- Left Arrow -->
             <div
-              v-if="innerWidth + 88 > outerWidth && scrollLeft !== 0"
+              v-if="innerWidth + 104 > outerWidth
+                      && scrollLeft !== 0"
               @click="toLeft"
               class="
-                  flex items-center justify-center
-                  absolute left-6 w-5 h-5 bg-red-500 rounded-full
+                  flex items-center justify-center z-50
+                  absolute left-6 w-5 h-5 bg-gray-200 rounded-full
+                  border-2 border-black
                 "
             >
               <button>
@@ -122,12 +134,13 @@
 
             <!-- Right Arrow -->
             <div
-              v-if="innerWidth + 88 > outerWidth
+              v-if="innerWidth + 104 > outerWidth
                        && scrollWidth - scrollLeft !== innerWidth"
               @click="toRight"
               class="
-                  flex items-center justify-center
-                  w-5 h-5 absolute right-16 bg-yellow-500 rounded-full
+                  flex items-center justify-center z-50
+                  w-5 h-5 absolute right-16 bg-gray-200 rounded-full
+                  border-2 border-black
                 "
             >
               <button>
@@ -141,7 +154,7 @@
               class="
                   relative
                   flex flex-none items-center justify-center
-                  w-24 h-24 bg-blue-100
+                  w-24 h-24 bg-gray-100
                   cursor-pointer
                 "
             >
@@ -167,7 +180,7 @@
           </div>
 
           <div
-            class="flex justify-center items-center bg-blue-100 pr-2 rounded-r-lg"
+            class="flex justify-center items-center bg-gray-600 pr-2 rounded-r-lg"
           >
             <button
               @click="clickAddImage"
@@ -179,12 +192,10 @@
         </div>
 
         <!-- Button Area -->
-        <div class="flex w-full pb-2 justify-between pr-2">
+<!--        <div class="flex w-full pb-2 justify-between pr-2">-->
 
           <!-- Dummy -->
-          <div
-            class="flex justify-center items-center gap-1"
-          />
+
 
           <!-- Dots -->
           <div
@@ -201,19 +212,17 @@
           <button
             v-if="localFiles.length !== 0"
             @click="clickGalleryButton"
-            class="rounded-full w-9 h-9 bg-gray-500"
+            class="
+              absolute bottom-4 right-4
+              rounded-full w-9 h-9 bg-gray-500
+            "
           >
             <b-icon icon="images" scale="1.25" color="white"/>
           </button>
-        </div>
+<!--        </div>-->
 
-      </div>
+
     </div>
-
-    <!--    <div>-->
-    <!--      Hello-->
-    <!--    </div>-->
-
   </div>
 </template>
 
@@ -246,8 +255,9 @@ export default {
     this.$nextTick( function () {
       this.outerWidth = this.$refs.outer.clientWidth
       this.innerWidth = this.$refs.inner.clientWidth
+      this.$refs.inner.addEventListener('scroll',  this.handleScroll)
     })
-    this.$refs.inner.addEventListener('scroll',  this.handleScroll)
+
 
     const hasFiles = ({dataTransfer: {types = []}}) =>
       types.indexOf("Files") > -1;
@@ -257,7 +267,7 @@ export default {
       for (const file of e.target.files) {
         this.localFiles.push(file)
       }
-      this.$emit('input', this.localFiles)
+      this.onFileUploaded()
     };
 
     this.$refs.uploadImage.addEventListener("dragenter", (evt) => {
@@ -273,7 +283,7 @@ export default {
       for (const file of evt.dataTransfer.files) {
         this.localFiles.push(file)
       }
-      this.$emit('input', this.localFiles)
+      this.onFileUploaded()
     });
 
     this.$refs.uploadImage.addEventListener("dragover", (evt) => {
@@ -292,28 +302,39 @@ export default {
     },
     clickUploadButton() {
       this.$refs.fileInput.click()
+
+      this.outerWidth = this.$refs.uploadImage.clientWidth
+
     },
     clickGalleryButton() {
       this.imageListModal = !this.imageListModal
     },
     clickAddImage() {
       this.$refs.fileInput.click()
-
-      this.outerWidth = this.$refs.outer.clientWidth
-      this.innerWidth = this.$refs.inner.clientWidth
     },
     clickImageThumbnail(i) {
       this.selectedIdx = i
     },
     clickImageCloseButton(i) {
       this.localFiles.splice(i, 1)
-      this.$emit('input', this.localFiles)
+      this.onFileRemoved()
 
       this.selectedIdx = i > 0 ? i - 1 : 0
 
       if (this.localFiles.length === 0) {
         this.imageListModal = false
       }
+    },
+    onFileUploaded() {
+      this.$emit('input', this.localFiles)
+      this.outerWidth = this.$refs.outer.clientWidth
+      this.innerWidth = this.$refs.inner.clientWidth
+
+    },
+    onFileRemoved() {
+      this.$emit('input', this.localFiles)
+      this.outerWidth = this.$refs.outer.clientWidth
+      this.innerWidth = this.$refs.inner.clientWidth
     },
     handleResize() {
       this.outerWidth = this.$refs.outer.clientWidth

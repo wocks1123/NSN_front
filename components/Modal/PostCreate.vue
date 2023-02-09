@@ -1,12 +1,12 @@
 <template>
   <ModalBase
-    :value="value" @input="$emit('input', false)" @close="$emit('close', true)"
-    classVal="w-screen h-screen sm:w-2/3 md:h-2/3 rounded-lg"
+    :value="value" @input="$emit('input', false)" @close="closeModel"
+    classVal="w-screen sm:w-11/12 lg:w-240 md:h-2/3 rounded-lg"
   >
-    <div class="overflow-y-auto w-full h-full bg-red-100 flex flex-col rounded-lg">
+    <div class="overflow-y-auto w-full h-full bg-white flex flex-col rounded-lg">
       <!-- Header -->
-      <div class="h-8 flex text-center  items-center">
-        <div class="absolute left-2 text-blue-600">
+      <div class="h-8 flex text-center  items-center border-b-2">
+        <div class="absolute left-2 text-blue-600 cursor-pointer" @click="closeModel">
           이전
         </div>
         <div class="absolute  items-center left-1/2 transform -translate-x-1/2">
@@ -17,23 +17,31 @@
       <!-- Body -->
       <div class=" flex flex-col md:flex-grow h-auto md:flex-row">
         <!-- Image Upload Area-->
-        <div class="h-96 md:h-auto w-full grow">
-          <drag-drop-file-uploader v-model="files"></drag-drop-file-uploader>
+        <div class="h-96 md:h-auto w-full grow border-r-2 md:border-b-0 border-b-2">
+          <drag-drop-file-uploader v-model="files" />
         </div>
         <!-- Form Area -->
-        <div class="w-96 w-full p-2">
+        <div class="md:w-96 p-2">
           <!-- Writer Info -->
-          <div class="flex items-center p-1">
-            <div>
-              <img
-                :src="$axios.defaults.baseURL + '/images/' + $auth.user.profileImagePath"
-                class="w-8 h-8 rounded-full"
-                alt="Profile"
-              />
+          <div class="flex items-center p-1 justify-between">
+            <div class="flex items-center">
+              <div>
+                <img
+                  :src="$axios.defaults.baseURL + '/media/' + $auth.user.profile_image_path"
+                  class="w-8 h-8 rounded-full"
+                  alt="Profile"
+                />
+              </div>
+
+              <div class="ml-2 text-sm font-bold">
+                {{ $auth.user.user_id }}
+              </div>
             </div>
 
-            <div class="ml-1 text-xs">
-              {{ $auth.user.userId }}
+            <div>
+              <DropdownButton
+                v-model="postScope"
+              />
             </div>
           </div>
 
@@ -58,7 +66,8 @@
           >
             <button
               @click="clickUploadButton"
-              class="p-1 mt-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              class="p-1 mt-2 text-white rounded-md"
+              :class="files.length > 0 ? ' bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-default'"
             >
               업로드
             </button>
@@ -79,6 +88,7 @@ export default {
   props: ['value'],
   data: () => ({
     content: "",
+    postScope: "1",
     files: [],
   }),
   mounted() {
@@ -88,7 +98,10 @@ export default {
   methods: {
     async clickUploadButton() {
       let formData = new FormData();
+      formData.append("author_id", this.$auth.user.user_id)
       formData.append("content", this.content)
+      formData.append("post_scope", this.postScope)
+
       for (const file of this.files) {
         formData.append("in_files", file)
       }
@@ -100,8 +113,14 @@ export default {
           header: { 'Content-Type': 'multipart/form-data' }
         }
       )
+
+      this.closeModel()
+    },
+    closeModel() {
       this.$emit('input', false)
       this.$emit('close', true)
+      this.content = ""
+      this.files = []
     }
   }
 
