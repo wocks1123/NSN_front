@@ -37,7 +37,6 @@
 
           <img
             ref="imageArea"
-            @click="clickImageArea"
             class="w-full object-contain min-h-0 h-full "
             :src="window.URL.createObjectURL(localFiles[selectedIdx])"
           />

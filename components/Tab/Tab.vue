@@ -43,11 +43,11 @@ export default {
         icon: 'bookmark',
         selected: false,
       },
-      {
-        text: "좋아요",
-        icon: 'hand-thumbs-up',
-        selected: false,
-      },
+      // {
+      //   text: "좋아요",
+      //   icon: 'hand-thumbs-up',
+      //   selected: false,
+      // },
     ]
   }),
   methods: {

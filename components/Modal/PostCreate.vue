@@ -88,7 +88,7 @@ export default {
   props: ['value'],
   data: () => ({
     content: "",
-    postScope: "1",
+    postScope: "ALL",
     files: [],
   }),
   mounted() {
@@ -107,7 +107,7 @@ export default {
       }
 
       await this.$axios.post(
-        "/posts",
+        "/posts/",
         formData,
         {
           header: { 'Content-Type': 'multipart/form-data' }

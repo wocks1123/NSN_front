@@ -40,7 +40,7 @@ export default {
         // 팔로우 취소
         this.mode = "loading"
         let { data } = await this.$axios.delete(
-          "/follows",
+          this.$axios.defaults.baseURL + "/follows/",
           {
             data: {
               from_user_id: this.$auth.user.user_id,
@@ -54,7 +54,7 @@ export default {
         // 팔로우 신청
         this.mode = "loading"
         let { data } = await this.$axios.post(
-          "/follows/",
+          this.$axios.defaults.baseURL + "/follows/",
           {
             from_user_id: this.$auth.user.user_id,
             to_user_id: this.userId,

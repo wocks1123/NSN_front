@@ -99,7 +99,6 @@ export default {
   name: "ProfileFollowing",
   props: ["value"],
   mounted() {
-    console.log("ProfileFollowing mounted")
   },
   data: () => ({
     followings: []
@@ -107,7 +106,7 @@ export default {
   methods: {
     async modalOpened() {
       let { data } = await this.$axios.get(
-        "/follows/from",
+        this.$axios.defaults.baseURL + "/follows/from",
         {
           params: {
             user_id: this.$route.params.id

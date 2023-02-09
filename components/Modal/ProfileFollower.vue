@@ -96,7 +96,7 @@ export default {
   methods: {
     async modalOpened() {
       let { data } = await this.$axios.get(
-        "/follows/to",
+        this.$axios.defaults.baseURL + "/follows/to",
         {
           params: {
             user_id: this.$route.params.id
