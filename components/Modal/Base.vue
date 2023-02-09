@@ -26,7 +26,24 @@
 <script>
 export default {
   name: "Base",
-  props: ['value', 'classVal'],
+  props: {
+    value: {
+      type: Boolean,
+      default: false
+    },
+    classVal: {
+      type: String,
+      default: ""
+    }
+  },
+  watch: {
+    value(newVal) {
+      if (newVal === true) {
+
+        this.$emit('open', true)
+      }
+    }
+  },
   methods: {
     clickBackground(evt) {
       this.$emit('input', false)
