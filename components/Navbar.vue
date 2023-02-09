@@ -8,7 +8,8 @@
         w-full
         bottom-0
         md:hidden
-        bg-red-300
+        bg-white
+        border-t-2
         items-center
         z-20
       "
@@ -16,7 +17,7 @@
       <div class="grid grid-cols-4 block h-12 items-center justify-items-center">
         <button
           @click="clickFooterButton(item.val)"
-          class="items-center inline-block bg-blue-100 cursor-pointer"
+          class="items-center inline-block cursor-pointer"
           v-for="(item, i) in footerItems"
           :key="i"
         >
@@ -32,11 +33,12 @@
       @resize="onresize"
       ref="nav"
       class="
+          bg-white
+          border-r-2
           hidden
           md:block
           md:fixed
           h-screen
-          bg-yellow-100
           z-30
           nav-transition
         "
@@ -44,9 +46,9 @@
     >
       <!-- Logo Area -->
       <div
-        class="bg-gray-500"
+        class="h-32 flex justify-center items-center"
       >
-        Logo
+        <b-icon icon="instagram" scale="2"/>
       </div>
       <!-- Button Area -->
       <div>
@@ -71,7 +73,7 @@
     </div>
 
     <!-- Post Modal -->
-    <ModalPostModal v-model="postModal" @close="onClosePostModal"/>
+    <ModalPostCreate v-if="$auth.user" v-model="postModal" @close="onClosePostModal"/>
   </div>
 </template>
 
@@ -168,14 +170,13 @@ export default {
 
     this.navItems[this.selectedNavItem].selected = true
     this.footerItems[this.selectedFooterItem].selected = true
+
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.onresize);
   },
   watch: {
     $route() {
-      // console.log("$route path", this.$route.path)
-      // console.log("$route name", this.$route.name)
       if (this.$route.name.includes("index")) {
         this.toggleSelectedItem("home")
       }
@@ -267,7 +268,7 @@ export default {
         this.toggleSelectedItem(val)
       }
       else if (val === 'profile') {
-        this.$router.push('/profile/' + this.$auth.user.userId)
+        this.$router.push('/profile/' + this.$auth.user.user_id)
         if (this.sideOpen) this.closeModal()
         this.toggleSelectedItem(val)
       }

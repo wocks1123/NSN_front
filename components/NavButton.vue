@@ -1,7 +1,6 @@
 <template>
   <div
     class="
-      bg-gray-100
       p-2
     "
   >
@@ -10,8 +9,8 @@
       class="
         flex
         items-center
-        bg-red-100
-        hover:bg-white
+        bg-white
+        hover:bg-gray-100
         transition-colors
         rounded-full
         h-12
