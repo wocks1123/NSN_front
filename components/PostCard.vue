@@ -10,7 +10,7 @@
           class="mr-2"
         >
           <img
-            :src="$axios.defaults.baseURL + '/images/' + post.author.profileImagePath"
+            :src="$axios.defaults.baseURL + '/media/' + post.author.profile_image_path"
             class="w-8 rounded-full"
             alt="Profile Image"
           />
@@ -18,7 +18,7 @@
 
         <div>
           <div class="font-bold text-sm">
-            {{ post.author.userName }}
+            {{ post.author.user_name }}
           </div>
           <div class="text-gray-500 text-xs">
             @{{ post.author.email }}
@@ -43,7 +43,7 @@
       <div
         class="bg-black"
       >
-        <Carousel :sources="post.images.map(({path}) => path)"/>
+        <Carousel :sources="post.media.map(({identifier}) => identifier)"/>
       </div>
 
       <!-- Post Info -->
@@ -54,9 +54,17 @@
             <div class="flex">
               <div>
                 <button
+                  @click="clickHeartButton"
                   class="w-8 h-8"
                 >
-                  <b-icon icon="heart" class="svg-block w-5 h-5" />
+                  <b-icon
+                    v-if="!post.is_liked"
+                    icon="heart" class="svg-block w-5 h-5"
+                  />
+                  <b-icon
+                    v-if="post.is_liked"
+                    icon="heart-fill" class="svg-block w-5 h-5 text-red-600"
+                  />
                 </button>
               </div>
               <div>
@@ -69,34 +77,34 @@
             </div>
 
             <div>
-              <button
-                class="w-8 h-8"
-              >
-                <b-icon icon="bookmark" class="svg-block w-5 h-5"/>
-              </button>
+              <BookmarkButton
+                v-model="post.scrapped"
+                :postId="post.id"
+                :userId="$auth.user.user_id"
+              />
             </div>
           </div>
         </div>
 
         <div
-          v-if="post.goodCount > 0"
+          v-if="post.liked_count > 0"
           class="px-2 font-bold text-sm"
         >
-          좋아요 {{post.goodCount}}개
+          좋아요 {{post.liked_count}}개
         </div>
       </div>
 
       <div class="px-2 py-1 break-all">
-        <span class="font-bold text-sm">{{ post.author.userName }}</span>
+        <span class="font-bold text-sm">{{ post.author.user_name }}</span>
         <span class="text-sm">{{ post.content }}</span>
       </div>
 
       <!-- Comments -->
       <div
-        v-if="post.commentCount > 0"
+        v-if="post.comment_count > 0"
         class="px-2 text-sm text-gray-400 cursor-pointer"
       >
-        댓글 {{post.commentCount}}개 모두 보기
+        댓글 {{post.comment_count}}개 모두 보기
       </div>
 
     </div>
@@ -106,7 +114,7 @@
       <div
         class="text-xs text-gray-400"
       >
-        {{elapsedTime}}
+        {{$elapsedTime(post.created_at)}}
       </div>
     </div>
 
@@ -114,7 +122,7 @@
     <div class="border-t-2 p-2">
       <CommentInput
         :postId="post.id"
-        :userId="post.author_id"
+        :userId="post.author.user_id"
       />
     </div>
 
@@ -156,32 +164,7 @@ export default {
     ]
   }),
   mounted() {
-
-  },
-  computed: {
-    elapsedTime() {
-      const start = new Date(this.post.created_at);
-      const end = new Date();
-
-      const diff = (end - start) / 1000;
-
-      const times = [
-        { name: '년', milliSeconds: 60 * 60 * 24 * 365 },
-        { name: '개월', milliSeconds: 60 * 60 * 24 * 30 },
-        { name: '일', milliSeconds: 60 * 60 * 24 },
-        { name: '시간', milliSeconds: 60 * 60 },
-        { name: '분', milliSeconds: 60 },
-      ];
-
-      for (const value of times) {
-        const betweenTime = Math.floor(diff / value.milliSeconds);
-
-        if (betweenTime > 0) {
-          return `${betweenTime}${value.name} 전`;
-        }
-      }
-      return '방금 전';
-    }
+    console.log("post in PostCard", this.post)
   },
   methods: {
     clickModalItem(i) {
@@ -195,17 +178,35 @@ export default {
       else if (i === 2) {
         this.modal = false
       }
+    },
+    async clickHeartButton() {
+      // 좋아요 -> 취소
+      if (this.post.is_liked) {
+        let res = await this.$axios.delete(
+          "/likes/post",
+          {
+            data: {
+              post_id: this.post.id,
+              user_id: this.$auth.user.user_id
+            }
+          }
+        )
+        this.post.liked_count -= 1
+      }
+      else {
+        let res = await this.$axios.post(
+          "/likes/post",
+          {
+            post_id: this.post.id,
+            user_id: this.$auth.user.user_id
+          }
+        )
+        this.post.liked_count += 1
+      }
+      this.post.is_liked = !this.post.is_liked
     }
   },
-  async clickGood() {
-    await this.$axios.post(
-      "/goods/post",
-      {
-        postId: this.post.id,
-        userId: this.$auth.user.userId
-      }
-    )
-  }
+
 }
 </script>
 
