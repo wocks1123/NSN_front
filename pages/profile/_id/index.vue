@@ -69,7 +69,7 @@
     </div>
 
 
-    <ModalPostRead v-model="postReadModal" :postId="showPost"/>
+<!--    <ModalPostRead v-model="postReadModal" :postId="showPost"/>-->
   </div>
 </template>
 
@@ -81,9 +81,8 @@ export default {
     loading: false,
 
     postCreateModal: false,
-    postReadModal: false,
-    showPost: null,
-
+    // postReadModal: false,
+    // showPost: null,
   }),
   async asyncData ({ $axios, route }) {
     let { data } = await $axios.get(
@@ -125,8 +124,9 @@ export default {
       )
     },
     clickPostCard(post) {
-      this.postReadModal = true
-      this.showPost = post.id
+      this.$router.push("/post/" + post.id)
+    //   this.postReadModal = true
+    //   this.showPost = post.id
     }
   },
 }
